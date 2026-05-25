@@ -18,6 +18,8 @@ import {
   Save
 } from 'lucide-react';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
 export default function App() {
   const [servers, setServers] = useState([]);
   const [selectedServerId, setSelectedServerId] = useState('mock-sandbox');
@@ -55,7 +57,7 @@ export default function App() {
     setPortStatus(null);
     setPortErrorMsg('');
     try {
-      const response = await fetch('http://localhost:5000/api/deploy/check-port', {
+      const response = await fetch(`${API_BASE_URL}/api/deploy/check-port`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -141,7 +143,7 @@ export default function App() {
   const fetchServers = async () => {
     setServersLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/servers');
+      const response = await fetch(`${API_BASE_URL}/api/servers`);
       const data = await response.json();
       setServers(data);
     } catch (e) {
@@ -154,7 +156,7 @@ export default function App() {
   const handleCreateServer = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/api/servers', {
+      const response = await fetch(`${API_BASE_URL}/api/servers`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(serverForm)
@@ -183,7 +185,7 @@ export default function App() {
     e.stopPropagation();
     if (confirm('Are you sure you want to remove this server configuration?')) {
       try {
-        await fetch(`http://localhost:5000/api/servers/${id}`, { method: 'DELETE' });
+        await fetch(`${API_BASE_URL}/api/servers/${id}`, { method: 'DELETE' });
         setServers(servers.filter(s => s.id !== id));
         if (selectedServerId === id) {
           setSelectedServerId('mock-sandbox');
@@ -198,7 +200,7 @@ export default function App() {
     setTestingConnection(true);
     setTestResult(null);
     try {
-      const response = await fetch('http://localhost:5000/api/servers/test', {
+      const response = await fetch(`${API_BASE_URL}/api/servers/test`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(selectedServerId === 'mock-sandbox' ? 
@@ -225,7 +227,7 @@ export default function App() {
       eventSourceRef.current.close();
     }
 
-    const sseUrl = `http://localhost:5000/api/deploy/stream/${session}`;
+    const sseUrl = `${API_BASE_URL}/api/deploy/stream/${session}`;
     const source = new EventSource(sseUrl);
     eventSourceRef.current = source;
 
@@ -251,7 +253,7 @@ export default function App() {
     setDeployStatus('running');
     
     try {
-      const response = await fetch('http://localhost:5000/api/deploy/clone', {
+      const response = await fetch(`${API_BASE_URL}/api/deploy/clone`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -279,7 +281,7 @@ export default function App() {
     setStep(5);
     setDeployStatus('setup_running');
     try {
-      const response = await fetch('http://localhost:5000/api/deploy/composer-setup', {
+      const response = await fetch(`${API_BASE_URL}/api/deploy/composer-setup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -309,7 +311,7 @@ export default function App() {
 
   const fetchFolders = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/deploy/list-dirs', {
+      const response = await fetch(`${API_BASE_URL}/api/deploy/list-dirs`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ serverId: selectedServerId })
@@ -329,7 +331,7 @@ export default function App() {
   const fetchGoFiles = async () => {
     setIsLoadingGoFiles(true);
     try {
-      const response = await fetch('http://localhost:5000/api/deploy/list-go-files', {
+      const response = await fetch(`${API_BASE_URL}/api/deploy/list-go-files`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -364,7 +366,7 @@ export default function App() {
     
     try {
       if (techStack === 'nuxt') {
-        const response = await fetch('http://localhost:5000/api/deploy/nuxt-deploy', {
+        const response = await fetch(`${API_BASE_URL}/api/deploy/nuxt-deploy`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -386,7 +388,7 @@ export default function App() {
           setLogs(prev => [...prev, `[SYSTEM ERROR] Nuxt.js deployment failed to initialize: ${err.error}`]);
         }
       } else if (techStack === 'golang') {
-        const response = await fetch('http://localhost:5000/api/deploy/golang-init', {
+        const response = await fetch(`${API_BASE_URL}/api/deploy/golang-init`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -407,7 +409,7 @@ export default function App() {
           setLogs(prev => [...prev, `[SYSTEM ERROR] Golang initialization failed: ${err.error}`]);
         }
       } else {
-        const response = await fetch('http://localhost:5000/api/deploy/copy-to-root', {
+        const response = await fetch(`${API_BASE_URL}/api/deploy/copy-to-root`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -443,7 +445,7 @@ export default function App() {
     setLogs(prev => [...prev, `[SYSTEM] Saving final environment configuration and starting Go compile...`]);
 
     try {
-      const response = await fetch('http://localhost:5000/api/deploy/golang-finalize', {
+      const response = await fetch(`${API_BASE_URL}/api/deploy/golang-finalize`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
